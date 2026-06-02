@@ -85,7 +85,11 @@ void fill_histograms(const std::vector<std::string>& fileList, Histograms& hist)
                             (reader.genDau_phi->at(ijet)).at(j),
                             pion_mass);
                         if(!pairPass(p1.Phi(), p1.Eta(), p2.Phi(), p2.Eta())) continue;
-                        float Q_inv = GetQ_JetFrame(p1, p2, jet4v);
+                        // BEFORE
+                        //float Q_inv = GetQ_JetFrame(p1, p2, jet4v);
+
+                        // AFTER
+                        float Q_inv = GetQ_JetAxis(p1, p2, jet4v);
                         for(int nch_bin_num : nch_bins)
                             for(int pt_bin_num : pt_bins)
                                 for(int eta_bin_num : eta_bins){
@@ -103,8 +107,11 @@ void fill_histograms(const std::vector<std::string>& fileList, Histograms& hist)
                                 for(const auto& past_jet : jetPool[nch_bin_num][pt_bin_num][eta_bin_num]){
                                     for(const auto& past_p : past_jet){
                                         if(!pairPass(p1.Phi(), p1.Eta(), past_p.p4.Phi(), past_p.p4.Eta())) continue;
-                                        float Q_inv = GetQ_JetFrame_Double(p1, jet4v, past_p.p4, past_p.jet4v);
-                                        if(past_p.charge == current_jet.back().charge)
+                                        // BEFORE
+                                        //float Q_inv = GetQ_JetFrame_Double(p1, jet4v, past_p.p4, past_p.jet4v);
+
+                                        // AFTER
+                                        float Q_inv = GetQ_JetAxis_Double(p1, jet4v, past_p.p4, past_p.jet4v);                                        if(past_p.charge == current_jet.back().charge)
                                             hist.hBckrnd_same[nch_bin_num][pt_bin_num][eta_bin_num]->Fill(Q_inv);
                                         else
                                             hist.hBckrnd_opposite[nch_bin_num][pt_bin_num][eta_bin_num]->Fill(Q_inv);

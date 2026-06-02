@@ -2,6 +2,7 @@
 
 #include "config.hpp"
 #include "Math/Boost.h"
+#include "coordinateTools.h"   // ADD THIS
 
 float GetMass(int pid){
     switch (abs(pid)){
@@ -51,5 +52,39 @@ float GetQ_JetFrame_Double(const ROOT::Math::PtEtaPhiMVector &p1,
     auto lv2b = booster2(lv2);
     auto lvdiff = lv1b - lv2b;
     double q = -(lvdiff.M2());
+    return (q >= 0.0 ? (float)TMath::Sqrt(q) : 0.f);
+}
+
+float GetQ_JetAxis(const ROOT::Math::PtEtaPhiMVector &p1,
+                   const ROOT::Math::PtEtaPhiMVector &p2,
+                   const ROOT::Math::PtEtaPhiMVector &jet)
+{
+    TVector3 jvec, t1, t2;
+    jvec.SetPtEtaPhi(jet.Pt(), jet.Eta(), jet.Phi());
+    t1.SetPtEtaPhi(p1.Pt(), p1.Eta(), p1.Phi());
+    t2.SetPtEtaPhi(p2.Pt(), p2.Eta(), p2.Phi());
+    TLorentzVector lv1, lv2;
+    lv1.SetPtEtaPhiM(t1.Perp(jvec), etaWRTJet(jvec, t1), phiWRTJet(jvec, t1), p1.M());
+    lv2.SetPtEtaPhiM(t2.Perp(jvec), etaWRTJet(jvec, t2), phiWRTJet(jvec, t2), p2.M());
+    TLorentzVector diff = lv1 - lv2;
+    double q = -(diff.Mag2());
+    return (q >= 0.0 ? (float)TMath::Sqrt(q) : 0.f);
+}
+
+float GetQ_JetAxis_Double(const ROOT::Math::PtEtaPhiMVector &p1,
+                          const ROOT::Math::PtEtaPhiMVector &jet1,
+                          const ROOT::Math::PtEtaPhiMVector &p2,
+                          const ROOT::Math::PtEtaPhiMVector &jet2)
+{
+    TVector3 jvec1, jvec2, t1, t2;
+    jvec1.SetPtEtaPhi(jet1.Pt(), jet1.Eta(), jet1.Phi());
+    jvec2.SetPtEtaPhi(jet2.Pt(), jet2.Eta(), jet2.Phi());
+    t1.SetPtEtaPhi(p1.Pt(), p1.Eta(), p1.Phi());
+    t2.SetPtEtaPhi(p2.Pt(), p2.Eta(), p2.Phi());
+    TLorentzVector lv1, lv2;
+    lv1.SetPtEtaPhiM(t1.Perp(jvec1), etaWRTJet(jvec1, t1), phiWRTJet(jvec1, t1), p1.M());
+    lv2.SetPtEtaPhiM(t2.Perp(jvec2), etaWRTJet(jvec2, t2), phiWRTJet(jvec2, t2), p2.M());
+    TLorentzVector diff = lv1 - lv2;
+    double q = -(diff.Mag2());
     return (q >= 0.0 ? (float)TMath::Sqrt(q) : 0.f);
 }
