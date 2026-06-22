@@ -83,6 +83,10 @@ void Histograms::Draw(Histograms* fsi)
     for(int i = 0; i < jet_nch_bin_count; i++){
         for(int j = 0; j < jet_pt_bin_count; j++){
             for(int k = 0; k < jet_eta_bin_count; k++){
+                if(hSignal_same[i][j][k]->GetEntries() == 0 &&
+                   hSignal_opposite[i][j][k]->GetEntries() == 0)
+                    continue;
+
                 TLatex tex;
                 tex.SetNDC();
                 tex.SetTextSize(0.035);
@@ -91,75 +95,81 @@ void Histograms::Draw(Histograms* fsi)
                 // --- correlations ---
                 c->Clear();
                 hCorrelation_same[i][j][k]->SetMarkerStyle(20);
-                hCorrelation_same[i][j][k]->SetMarkerColor(kRed);
-                hCorrelation_same[i][j][k]->SetLineColor(kRed);
+                hCorrelation_same[i][j][k]->SetMarkerColor(kBlack);
+                hCorrelation_same[i][j][k]->SetLineColor(kBlack);
                 hCorrelation_same[i][j][k]->SetFillStyle(0);
                 hCorrelation_same[i][j][k]->GetXaxis()->SetTitle("Q");
                 hCorrelation_same[i][j][k]->GetYaxis()->SetTitle("C(Q)");
                 hCorrelation_same[i][j][k]->GetXaxis()->SetRangeUser(Q_min, Q_max);
                 hCorrelation_same[i][j][k]->GetYaxis()->SetRangeUser(0.75, 2.05);
                 hCorrelation_same[i][j][k]->Draw("E1");
-                hCorrelation_opposite[i][j][k]->SetMarkerStyle(21);
+                hCorrelation_opposite[i][j][k]->SetMarkerStyle(24);
                 hCorrelation_opposite[i][j][k]->SetMarkerColor(kBlue);
                 hCorrelation_opposite[i][j][k]->SetLineColor(kBlue);
                 hCorrelation_opposite[i][j][k]->SetFillStyle(0);
                 hCorrelation_opposite[i][j][k]->Draw("E1 SAME");
                 if(fsi){
-                    fsi->hCorrelation_same[i][j][k]->SetMarkerStyle(33);
-                    fsi->hCorrelation_same[i][j][k]->SetMarkerColor(kOrange+1);
-                    fsi->hCorrelation_same[i][j][k]->SetLineColor(kOrange+1);
+                    fsi->hCorrelation_same[i][j][k]->SetMarkerStyle(20);
+                    fsi->hCorrelation_same[i][j][k]->SetMarkerColor(kRed);
+                    fsi->hCorrelation_same[i][j][k]->SetLineColor(kRed);
                     fsi->hCorrelation_same[i][j][k]->SetFillStyle(0);
                     fsi->hCorrelation_same[i][j][k]->Draw("E1 SAME");
-                    fsi->hCorrelation_opposite[i][j][k]->SetMarkerStyle(34);
-                    fsi->hCorrelation_opposite[i][j][k]->SetMarkerColor(kViolet+1);
-                    fsi->hCorrelation_opposite[i][j][k]->SetLineColor(kViolet+1);
+                    fsi->hCorrelation_opposite[i][j][k]->SetMarkerStyle(24);
+                    fsi->hCorrelation_opposite[i][j][k]->SetMarkerColor(kOrange+1);
+                    fsi->hCorrelation_opposite[i][j][k]->SetLineColor(kOrange+1);
                     fsi->hCorrelation_opposite[i][j][k]->SetFillStyle(0);
                     fsi->hCorrelation_opposite[i][j][k]->Draw("E1 SAME");
                 }
                 line.Draw("SAME");
-                TLegend leg(0.55, 0.65, 0.88, 0.88);
+                TLegend leg(0.5, 0.62, 0.88, 0.88);
                 leg.SetBorderSize(0);
                 leg.SetFillStyle(0);
-                leg.AddEntry(hCorrelation_same[i][j][k],     "Same charge, no FSI",     "p");
-                leg.AddEntry(hCorrelation_opposite[i][j][k], "Opposite charge, no FSI", "p");
+                leg.SetTextFont(42);
+                leg.SetTextSize(0.032);
+                leg.AddEntry(hCorrelation_same[i][j][k],     "No FSI (SS)", "lp");
+                leg.AddEntry(hCorrelation_opposite[i][j][k], "No FSI (OS)", "lp");
                 if(fsi){
-                    leg.AddEntry(fsi->hCorrelation_same[i][j][k],     "Same charge, FSI",     "p");
-                    leg.AddEntry(fsi->hCorrelation_opposite[i][j][k], "Opposite charge, FSI", "p");
+                    leg.AddEntry(fsi->hCorrelation_same[i][j][k],     "FSI (SS)", "lp");
+                    leg.AddEntry(fsi->hCorrelation_opposite[i][j][k], "FSI (OS)", "lp");
                 }
+                leg.AddEntry(&line, "Reference (C=1)", "l");
                 leg.Draw();
-                tex.DrawLatex(0.17, 0.9,  Form("%.0f #leq N_{ch} < %.0f", jet_nch_low[i], jet_nch_high[i]));
-                tex.DrawLatex(0.17, 0.85, Form("%.1f #leq p_{T} < %.1f GeV", jet_pt_low[j], jet_pt_high[j]));
-                tex.DrawLatex(0.17, 0.8,  Form("%.2f #leq #eta < %.2f", jet_eta_low[k], jet_eta_high[k]));
+                tex.DrawLatex(0.18, 0.9,  Form("%.0f #leq N_{ch} < %.0f", jet_nch_low[i], jet_nch_high[i]));
+                tex.DrawLatex(0.18, 0.85, Form("%.1f #leq p_{T} < %.1f GeV", jet_pt_low[j], jet_pt_high[j]));
+                tex.DrawLatex(0.18, 0.8,  Form("%.2f #leq #eta < %.2f", jet_eta_low[k], jet_eta_high[k]));
                 c->Print(Form("output/correlations_nch%d_pt%d_eta%d.pdf", i, j, k));
 
                 // --- relative ---
                 c->Clear();
                 hRelative[i][j][k]->SetMarkerStyle(20);
-                hRelative[i][j][k]->SetMarkerColor(kGreen+2);
-                hRelative[i][j][k]->SetLineColor(kGreen+2);
+                hRelative[i][j][k]->SetMarkerColor(kBlack);
+                hRelative[i][j][k]->SetLineColor(kBlack);
                 hRelative[i][j][k]->SetFillStyle(0);
                 hRelative[i][j][k]->GetXaxis()->SetTitle("Q");
                 hRelative[i][j][k]->GetYaxis()->SetTitle("C_{same}(Q) / C_{opposite}(Q)");
                 hRelative[i][j][k]->GetXaxis()->SetRangeUser(Q_min, Q_max);
                 hRelative[i][j][k]->GetYaxis()->SetRangeUser(0.75, 2.05);
                 hRelative[i][j][k]->Draw("E1");
+                TLegend leg2(0.5, 0.68, 0.88, 0.88);
+                leg2.SetBorderSize(0);
+                leg2.SetFillStyle(0);
+                leg2.SetTextFont(42);
+                leg2.SetTextSize(0.032);
+                leg2.AddEntry(hRelative[i][j][k], "No FSI", "lp");
                 if(fsi){
-                    fsi->hRelative[i][j][k]->SetMarkerStyle(33);
-                    fsi->hRelative[i][j][k]->SetMarkerColor(kOrange+1);
-                    fsi->hRelative[i][j][k]->SetLineColor(kOrange+1);
+                    fsi->hRelative[i][j][k]->SetMarkerStyle(20);
+                    fsi->hRelative[i][j][k]->SetMarkerColor(kRed);
+                    fsi->hRelative[i][j][k]->SetLineColor(kRed);
                     fsi->hRelative[i][j][k]->SetFillStyle(0);
                     fsi->hRelative[i][j][k]->Draw("E1 SAME");
-                    TLegend leg2(0.55, 0.65, 0.75, 0.85);
-                    leg2.SetBorderSize(0);
-                    leg2.SetFillStyle(0);
-                    leg2.AddEntry(hRelative[i][j][k],      "No FSI",   "p");
-                    leg2.AddEntry(fsi->hRelative[i][j][k], "With FSI", "p");
-                    leg2.Draw();
+                    leg2.AddEntry(fsi->hRelative[i][j][k], "With FSI", "lp");
                 }
+                leg2.AddEntry(&line, "Reference (C=1)", "l");
+                leg2.Draw();
                 line.Draw("SAME");
-                tex.DrawLatex(0.17, 0.9,  Form("%.0f #leq N_{ch} < %.0f", jet_nch_low[i], jet_nch_high[i]));
-                tex.DrawLatex(0.17, 0.85, Form("%.1f #leq p_{T} < %.1f GeV", jet_pt_low[j], jet_pt_high[j]));
-                tex.DrawLatex(0.17, 0.8,  Form("%.2f #leq #eta < %.2f", jet_eta_low[k], jet_eta_high[k]));
+                tex.DrawLatex(0.18, 0.9,  Form("%.0f #leq N_{ch} < %.0f", jet_nch_low[i], jet_nch_high[i]));
+                tex.DrawLatex(0.18, 0.85, Form("%.1f #leq p_{T} < %.1f GeV", jet_pt_low[j], jet_pt_high[j]));
+                tex.DrawLatex(0.18, 0.8,  Form("%.2f #leq #eta < %.2f", jet_eta_low[k], jet_eta_high[k]));
                 c->Print(Form("output/relative_nch%d_pt%d_eta%d.pdf", i, j, k));
             }
         }
