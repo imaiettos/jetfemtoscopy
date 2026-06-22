@@ -4,19 +4,26 @@
 #include "analysis.cpp"
 #include <fstream>
 
-int main(int argc, char* argv[]) {
-    if(argc < 2){
-        std::cerr << "Usage: " << argv[0] << " filelist.txt\n";
-        return 1;
-    }
-    std::ifstream ifs(argv[1]);
+auto readFileList = [](const char* path) {
+    std::ifstream ifs(path);
     std::vector<std::string> files;
     std::string line;
     while(std::getline(ifs, line))
         if(!line.empty()) files.push_back(line);
+    return files;
+};
+
+int main(int argc, char* argv[]) {
+    if(argc < 3){
+        std::cerr << "Usage: " << argv[0] << " input.txt input_wFSI.txt\n";
+        return 1;
+    }
 
     Histograms hist;
-    fill_histograms(files, hist);
+    fill_histograms(readFileList(argv[1]), hist);
+
+    Histograms hist_fsi("FSI_");
+    fill_histograms(readFileList(argv[2]), hist_fsi);
 
     TFile* out = TFile::Open("output_new.root", "RECREATE");
     for(int i=0; i<jet_nch_bin_count; i++)
@@ -32,6 +39,6 @@ int main(int argc, char* argv[]) {
             }
     out->Close();
 
-    hist.Draw("correlations.pdf", "relative.pdf");
+    hist.Draw(&hist_fsi);
     return 0;
 }

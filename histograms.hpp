@@ -4,8 +4,8 @@
 
 class Histograms {
 public:
-    Histograms();
-    void Draw(std::string filename1, std::string filename2);
+    Histograms(const std::string& prefix = "");
+    void Draw(Histograms* fsi = nullptr);
     
     TH1D* hSignal_same[jet_nch_bin_count][jet_pt_bin_count][jet_eta_bin_count];
     TH1D* hSignal_opposite[jet_nch_bin_count][jet_pt_bin_count][jet_eta_bin_count];
